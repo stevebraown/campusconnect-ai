@@ -1,0 +1,31 @@
+# FastAPI & Web
+fastapi==0.115.0
+uvicorn==0.32.0
+pydantic==2.9.2
+python-dotenv==1.0.1
+pydantic-settings==2.6.1
+
+# LLM & LangChain
+langchain==0.3.5
+langgraph==0.3.29
+langchain-openai==0.3.0
+openai>=1.58.1,<2.0.0
+
+# Firebase
+firebase-admin==6.5.0
+
+# Logging & Monitoring
+python-json-logger==2.0.7
+
+# LangSmith (optional, for tracing)
+langsmith>=0.1.17,<0.2.0
+
+# Utilities
+requests==2.32.3
+httpx==0.28.1
+
+# Testing
+pytest==7.4.2
+pytest-asyncio==0.22.0
+pytest-cov==4.1.0
+python-dotenv==1.0.1
