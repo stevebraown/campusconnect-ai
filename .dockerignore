@@ -1,0 +1,70 @@
+# Git & version control
+.git
+.gitignore
+.github
+
+# Environment & secrets (NEVER bake into image)
+.env
+.env.local
+.env.*.local
+
+# Config & credentials (mounted at runtime, not baked in)
+config/serviceAccountKey.json
+config/*.json
+
+# Python cache & compiled files
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg-info/
+dist/
+build/
+
+# Testing & coverage
+.pytest_cache
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+
+# Virtual environments
+.venv
+venv/
+env/
+ENV/
+
+# IDE & editor files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.settings
+.classpath
+
+# Logs
+logs/
+*.log
+
+# Documentation (not needed in runtime image)
+docs/
+README.md
+SETUP.md
+DEPLOYMENT.md
+ARCHITECTURE.md
+API.md
+CONTRIBUTING.md
+LICENSE
+
+# Other build artifacts
+.cache
+tmp/
+temp/
+node_modules/
+.next/
+dist/
