@@ -3,7 +3,8 @@ FastAPI server for CampusConnect AI Service.
 
 Exposes:
   - GET /health - Health check
-  - POST /run-graph - Execute any graph (matching, safety, onboarding, events_communities)
+  - POST /run-graph - Execute any graph (matching, safety, onboarding, events_communities, help)
+  - POST /api/ai-match, /api/ai-onboarding, /api/ai-events, /api/ai-safety, /api/ai-help - Spec-compliant wrapper endpoints
   - GET /docs - Interactive API documentation (Swagger UI)
   - GET /openapi.json - OpenAPI schema
 """
@@ -30,6 +31,7 @@ from src.graphs.matching import create_matching_graph
 from src.graphs.safety import create_safety_graph
 from src.graphs.onboarding import create_onboarding_graph
 from src.graphs.events_communities import create_events_communities_graph
+from src.graphs.help import create_help_graph
 
 # Setup logging
 setup_logging(debug=config.DEBUG)
@@ -84,12 +86,52 @@ class GraphRequest(BaseModel):
     
     Attributes:
         graph (str): Name of graph to execute.
-                    Options: 'matching', 'safety', 'onboarding', 'events_communities'
+                    Options: 'matching', 'safety', 'onboarding', 'events_communities', 'help'
         input (dict): Input state for the graph.
                      Content depends on which graph is being run.
     """
     graph: str
     input: Dict[str, Any]
+
+
+# Request models for spec-compliant /api/ai-* endpoints
+class MatchRequest(BaseModel):
+    """Request for /api/ai-match."""
+    user_id: str
+    tenant_id: str
+    preferences: Optional[Dict[str, Any]] = None
+
+
+class SafetyRequest(BaseModel):
+    """Request for /api/ai-safety."""
+    user_id: str
+    content: str
+    content_type: str = "message"
+    tenant_id: Optional[str] = None
+
+
+class OnboardingRequest(BaseModel):
+    """Request for /api/ai-onboarding."""
+    user_id: str
+    tenant_id: str
+    form_data: Optional[Dict[str, Any]] = None
+    current_step: Optional[int] = None
+    conversation_history: Optional[list] = None
+
+
+class EventsRequest(BaseModel):
+    """Request for /api/ai-events."""
+    user_id: str
+    tenant_id: str
+    request_type: str = "events"
+    filters: Optional[Dict[str, Any]] = None
+
+
+class HelpRequest(BaseModel):
+    """Request for /api/ai-help."""
+    query: str
+    user_id: Optional[str] = None
+    tenant_id: Optional[str] = None
 
 
 class GraphResponse(BaseModel):
@@ -157,6 +199,7 @@ async def run_graph(
       - safety: Content moderation (pattern + LLM hybrid)
       - onboarding: Guided profile collection for new students
       - events_communities: Event and community recommendations
+      - help: User support queries and FAQ responses
     
     Args:
         request (GraphRequest): Contains graph name and input state
@@ -202,12 +245,16 @@ async def run_graph(
             graph = create_events_communities_graph()
             logger.debug("Created events_communities graph")
             
+        elif request.graph == "help":
+            graph = create_help_graph()
+            logger.debug("Created help graph")
+            
         else:
             logger.error(f"Unknown graph: {request.graph}")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Unknown graph: {request.graph}. "
-                       f"Valid options: matching, safety, onboarding, events_communities"
+                       f"Valid options: matching, safety, onboarding, events_communities, help"
             )
         
         # ============================================================
@@ -283,6 +330,73 @@ async def run_graph(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error"
         )
+
+
+# ============================================================
+# SPEC-COMPLIANT /api/ai-* WRAPPER ENDPOINTS
+# ============================================================
+
+@app.post("/api/ai-match", response_model=GraphResponse, tags=["API"])
+async def ai_match(
+    request: MatchRequest,
+    authorization: Annotated[Optional[str], Header()] = None,
+) -> GraphResponse:
+    """Run the matching agent. Returns compatibility matches for the user."""
+    return await run_graph(
+        request=GraphRequest(graph="matching", input=request.model_dump()),
+        authorization=authorization,
+    )
+
+
+@app.post("/api/ai-onboarding", response_model=GraphResponse, tags=["API"])
+async def ai_onboarding(
+    request: OnboardingRequest,
+    authorization: Annotated[Optional[str], Header()] = None,
+) -> GraphResponse:
+    """Run the onboarding agent. Guided profile setup for new students."""
+    return await run_graph(
+        request=GraphRequest(graph="onboarding", input=request.model_dump()),
+        authorization=authorization,
+    )
+
+
+@app.post("/api/ai-events", response_model=GraphResponse, tags=["API"])
+async def ai_events(
+    request: EventsRequest,
+    authorization: Annotated[Optional[str], Header()] = None,
+) -> GraphResponse:
+    """Run the events/communities agent. Event and group recommendations."""
+    return await run_graph(
+        request=GraphRequest(
+            graph="events_communities",
+            input=request.model_dump(),
+        ),
+        authorization=authorization,
+    )
+
+
+@app.post("/api/ai-safety", response_model=GraphResponse, tags=["API"])
+async def ai_safety(
+    request: SafetyRequest,
+    authorization: Annotated[Optional[str], Header()] = None,
+) -> GraphResponse:
+    """Run the safety agent. Content moderation for messages/posts."""
+    return await run_graph(
+        request=GraphRequest(graph="safety", input=request.model_dump()),
+        authorization=authorization,
+    )
+
+
+@app.post("/api/ai-help", response_model=GraphResponse, tags=["API"])
+async def ai_help(
+    request: HelpRequest,
+    authorization: Annotated[Optional[str], Header()] = None,
+) -> GraphResponse:
+    """Run the help agent. Support queries and FAQ responses."""
+    return await run_graph(
+        request=GraphRequest(graph="help", input=request.model_dump()),
+        authorization=authorization,
+    )
 
 
 @app.get("/", tags=["System"])

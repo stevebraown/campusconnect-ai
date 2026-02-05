@@ -1,5 +1,5 @@
 # Multi-stage build: base stage installs dependencies
-FROM python:3.12-slim as base
+FROM python:3.12-slim AS base
 
 WORKDIR /app
 
@@ -13,7 +13,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Runtime stage: minimal image with only runtime deps and app code
-FROM python:3.12-slim as runtime
+FROM python:3.12-slim AS runtime
 
 WORKDIR /app
 
