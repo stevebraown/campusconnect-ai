@@ -1,23 +1,21 @@
-# Setup Guide: CampusConnect AI Service
+# Setup Guide
 
-Step-by-step instructions for developers to run the CampusConnect AI microservice locally.
+Complete step-by-step instructions to get CampusConnect AI running locally.
 
 ## Prerequisites
 
-- **Python 3.11+** (check: `python --version`)
+- **Python 3.9+** (check: `python --version`)
 - **pip** (comes with Python)
 - **git** (check: `git --version`)
-- **Firebase project** with Firestore (free tier ok)
-- **Perplexity API key** (or OpenAI API key)
+- **Firebase project** (free tier ok)
+- **LLM API key** (Perplexity or OpenAI)
 
 ## Step 1: Clone the repository
 
 ```bash
-git clone git@github.com:stevebraown/campusconnect-ai.git
+git clone https://github.com/yourusername/campusconnect-ai.git
 cd campusconnect-ai
 ```
-
-(Or use HTTPS: `git clone https://github.com/stevebraown/campusconnect-ai.git`)
 
 ## Step 2: Create a Python virtual environment
 
@@ -41,7 +39,7 @@ You should see `(venv)` in your terminal prompt.
 pip install -r requirements.txt
 ```
 
-This installs (among others):
+This installs:
 
 - fastapi, uvicorn – API framework
 - langgraph, langchain – AI orchestration

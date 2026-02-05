@@ -251,34 +251,3 @@ def validate_user_exists(user_id: str) -> bool:
     except Exception as exc:
         logger.error("Failed to validate user exists: %s", str(exc))
         raise FirestoreUnavailableError(str(exc)) from exc
-
-
-def get_help_articles(tenant_id: str, limit: int = 20) -> list[dict]:
-    """Query FAQ/help articles for the Help agent (optional).
-
-    Expects collection "help_articles" or "faq" with fields: id (or doc id),
-    question, answer, tenantId (optional). Returns list of {id, question, answer}.
-    """
-
-    try:
-        for coll_name in ("help_articles", "faq"):
-            docs = list(get_db().collection(coll_name).limit(limit * 2).stream())
-            if not docs:
-                continue
-            out = []
-            for doc in docs:
-                d = doc.to_dict() or {}
-                if tenant_id and d.get("tenantId") and d.get("tenantId") != tenant_id:
-                    continue
-                out.append({
-                    "id": str(d.get("id") or doc.id),
-                    "question": d.get("question", ""),
-                    "answer": d.get("answer", ""),
-                })
-                if len(out) >= limit:
-                    break
-            return out
-        return []
-    except Exception as exc:
-        logger.warning("Failed to fetch help articles: %s", str(exc))
-        return []

@@ -146,40 +146,6 @@ Return JSON mapping {item_id: reason} explaining why each item fits the user."""
     return prompt | llm | parser
 
 
-class HelpAnswer(BaseModel):
-    """Output schema for help/FAQ agent."""
-
-    response: str = Field(..., description="Concise answer text (under 500 chars)")
-    sources: list[str] = Field(
-        default_factory=list,
-        description="FAQ or article IDs referenced",
-    )
-    confidence: float = Field(..., description="Confidence score 0-1")
-
-
-def get_help_answer_chain(llm):
-    """Chain for generating contextual help/FAQ answers using Perplexity."""
-
-    prompt = ChatPromptTemplate.from_template(
-        """You are a helpful support assistant for CampusConnect, a university student networking app.
-
-User question: {query}
-
-{faq_context}
-
-Instructions:
-1. Answer concisely and helpfully (under 500 characters total).
-2. If FAQ/help articles are provided above, prefer them and cite their IDs in "sources".
-3. Otherwise use general knowledge about profile editing, matching, events, and safety on the app.
-4. Set "confidence" between 0 and 1 based on how sure you are.
-
-Respond in JSON format with: response (string), sources (list of FAQ/article IDs or empty), confidence (float 0-1)."""
-    )
-
-    parser = JsonOutputParser(pydantic_object=HelpAnswer)
-    return prompt | llm | parser
-
-
 def log_llm_error(context: str, exc: Exception) -> None:
     """Log LLM errors with context for easier debugging."""
 

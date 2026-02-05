@@ -53,7 +53,6 @@ Authorization: Bearer <AI_SERVICE_TOKEN>
 - safety
 - onboarding
 - events_communities
-- help
 
 #### Example: Matching
 
@@ -102,49 +101,11 @@ Authorization: Bearer <AI_SERVICE_TOKEN>
   "input": {
     "user_id": "test-user-123",
     "tenant_id": "university-1",
-    "request_type": "events",
-    "filters": {}
+    "interests": ["AI", "Startups"],
+    "location": { "lat": 37.77, "lng": -122.42 }
   }
 }
 ```
-
-#### Example: Help
-
-```json
-{
-  "graph": "help",
-  "input": {
-    "query": "How do I change my profile?",
-    "user_id": "test-user-123",
-    "tenant_id": "university-1"
-  }
-}
-```
-
-**Help response (in `data`):**
-```json
-{
-  "response": "Go to Profile in the app menu, tap Edit, then update your name, bio, or photo.",
-  "sources": ["faq_profile_edit"],
-  "confidence": 0.95
-}
-```
-
----
-
-## Spec-compliant wrapper endpoints
-
-The backend can call these instead of `/run-graph` for a stable API surface.
-
-| Endpoint | Purpose |
-|----------|---------|
-| POST /api/ai-match | Matching agent |
-| POST /api/ai-onboarding | Onboarding agent |
-| POST /api/ai-events | Events/communities agent |
-| POST /api/ai-safety | Safety agent |
-| POST /api/ai-help | Help/FAQ agent |
-
-Request bodies match the `input` objects in the `/run-graph` examples above. Response format is the same: `{ "success": true, "graph": "...", "data": { ... }, "error": null }`.
 
 ---
 

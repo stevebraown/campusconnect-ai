@@ -2,25 +2,12 @@
 
 FastAPI + LangGraph AI agents for multi-university matching, safety, onboarding, and event/community recommendations.
 
-## Agents
-
-The service exposes five LangGraph agents:
-
-| Agent | Purpose |
-|-------|---------|
-| **matching** | Student compatibility scoring (deterministic + LLM reasoning). |
-| **onboarding** | Guided profile collection with AI validation. |
-| **events** | Event and community recommendations based on interests. |
-| **safety** | Content moderation (pattern + LLM hybrid). |
-| **help** | User support queries and FAQ responses (Perplexity + optional Firestore FAQs). |
-
 ## Features
 
 - **Matching** – Student compatibility scoring (deterministic + LLM reasoning).
 - **Safety** – Content moderation (pattern + LLM hybrid).
 - **Onboarding** – Guided profile collection with AI validation.
 - **Events & Communities** – Event/group recommendations based on interests.
-- **Help** – Support and FAQ answers (concise, under 500 chars; optional Firestore help articles).
 
 ## Tech Stack
 
@@ -74,68 +61,13 @@ The service exposes five LangGraph agents:
 ## API Overview
 
 | Endpoint | Method | Purpose |
-|----------|--------|---------|
+|---|---|---|
 | /health | GET | Health check |
-| /run-graph | POST | Execute any graph by name (matching, safety, onboarding, events_communities, help) |
-| /api/ai-match | POST | Matching agent (spec-compliant) |
-| /api/ai-onboarding | POST | Onboarding agent (spec-compliant) |
-| /api/ai-events | POST | Events/communities agent (spec-compliant) |
-| /api/ai-safety | POST | Safety/moderation agent (spec-compliant) |
-| /api/ai-help | POST | Help/FAQ agent (spec-compliant) |
+| /run-graph | POST | Execute a graph (matching, safety, onboarding, events_communities) |
 | /docs | GET | Interactive Swagger UI |
 | /openapi.json | GET | OpenAPI schema |
 
 See [docs/API.md](docs/API.md) for detailed endpoint documentation.
-
-### API Endpoints (examples)
-
-**Matching** – `POST /api/ai-match`
-```json
-{
-  "user_id": "user-123",
-  "tenant_id": "university-1",
-  "preferences": { "radiusMeters": 200000, "minScore": 30 }
-}
-```
-
-**Onboarding** – `POST /api/ai-onboarding`
-```json
-{
-  "user_id": "user-123",
-  "tenant_id": "university-1",
-  "form_data": { "name": "Jane", "email": "jane@example.com" }
-}
-```
-
-**Events** – `POST /api/ai-events`
-```json
-{
-  "user_id": "user-123",
-  "tenant_id": "university-1",
-  "request_type": "events",
-  "filters": {}
-}
-```
-
-**Safety** – `POST /api/ai-safety`
-```json
-{
-  "user_id": "user-123",
-  "content": "Hello, let's be friends!",
-  "content_type": "message",
-  "tenant_id": "university-1"
-}
-```
-
-**Help** – `POST /api/ai-help`
-```json
-{
-  "query": "How do I change my profile?",
-  "user_id": "user-123",
-  "tenant_id": "university-1"
-}
-```
-Response includes `response`, `sources` (FAQ IDs), and `confidence`.
 
 ## Project Structure
 
@@ -146,8 +78,7 @@ campusconnect-ai/
 │   │   ├── matching.py           # Matching graph
 │   │   ├── safety.py             # Safety/moderation graph
 │   │   ├── onboarding.py         # Onboarding graph
-│   │   ├── events_communities.py # Events/groups graph
-│   │   └── help.py               # Help/FAQ graph
+│   │   └── events_communities.py # Events/groups graph
 │   ├── tools/
 │   │   ├── firestore_tools.py    # Firebase access
 │   │   ├── llm_client.py         # LLM provider selection
@@ -215,21 +146,16 @@ Manual testing via Swagger UI:
 ## Environment Variables
 
 **Required**
-- **FIREBASE_PROJECT_ID** – Firebase project ID (Firestore).
-- **GOOGLE_APPLICATION_CREDENTIALS** – Path to Firebase service account JSON (e.g. `./config/serviceAccountKey.json`).
-- **PERPLEXITY_API_KEY** (or **OPENAI_API_KEY**) – LLM for reasoning and help answers (Perplexity recommended for cost).
+- FIREBASE_PROJECT_ID
+- GOOGLE_APPLICATION_CREDENTIALS (path to service account JSON)
+- PERPLEXITY_API_KEY (or OPENAI_API_KEY)
 
 **Optional**
-- **AI_SERVICE_TOKEN** – Shared secret for `/run-graph` and `/api/ai-*` auth (Bearer token).
-- **LANGSMITH_API_KEY** – LLM tracing.
-- **DEBUG** – Verbose logs.
-- **GRAPH_TIMEOUT** – Graph execution timeout in seconds (default 30).
+- AI_SERVICE_TOKEN (shared secret for /run-graph auth)
+- LANGSMITH_API_KEY (LLM tracing)
+- DEBUG (verbose logs)
 
-**Firestore:** Use Firebase Console → Project Settings → Service Accounts → Generate new private key; save as `config/serviceAccountKey.json`. See [SETUP.md](SETUP.md).
-
-**Perplexity:** Get an API key from [Perplexity API settings](https://www.perplexity.ai/settings/api); set `PERPLEXITY_API_KEY=pplx-...` in `.env`.
-
-See `.env.example` for the full list with explanations.
+See .env.example for full list with explanations.
 
 ## Performance & Limits
 

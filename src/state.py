@@ -119,23 +119,3 @@ class EventsCommunitiesState(TypedDict, total=False):
     reasoning: JsonDict
     # Error message if any step fails.
     error: str
-
-
-class HelpState(TypedDict, total=False):
-    """State for the Help/FAQ agent."""
-
-    # User query (e.g. "How do I change my profile?").
-    query: str
-    # User and tenant for optional FAQ lookup.
-    user_id: str
-    tenant_id: str
-    # Optional FAQ/help articles from Firestore.
-    faq_articles: JsonList
-    # LLM-generated answer (under 500 chars).
-    response: str
-    # FAQ IDs or article IDs referenced in the answer.
-    sources: JsonList
-    # Confidence 0–1.
-    confidence: float
-    # Error message if processing fails.
-    error: str
