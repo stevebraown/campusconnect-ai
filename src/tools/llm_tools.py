@@ -146,6 +146,57 @@ Return JSON mapping {item_id: reason} explaining why each item fits the user."""
     return prompt | llm | parser
 
 
+class ConversationSummary(BaseModel):
+    """Output schema for conversation summarisation."""
+
+    summary: str = Field(..., description="Brief summary of the conversation")
+
+
+def get_conversation_summary_chain(llm):
+    """Chain for summarising a chat conversation."""
+
+    prompt = ChatPromptTemplate.from_template(
+        """You are a helpful assistant for a campus networking app.
+
+Below is a conversation between users. Summarise it concisely for the current user (2-4 sentences).
+Include: main topics discussed, any decisions or next steps, and tone.
+
+Conversation messages (format: Sender: content):
+{messages_text}
+
+Respond in JSON format with a single "summary" field."""
+    )
+
+    parser = JsonOutputParser(pydantic_object=ConversationSummary)
+    return prompt | llm | parser
+
+
+class DraftReply(BaseModel):
+    """Output schema for draft reply."""
+
+    draft_reply: str = Field(..., description="Draft message text")
+
+
+def get_draft_reply_chain(llm):
+    """Chain for drafting a reply to a conversation."""
+
+    prompt = ChatPromptTemplate.from_template(
+        """You are a helpful assistant for a campus networking app.
+
+Below is a recent conversation. Draft a reply for the current user.
+User hint (optional tone/style): {user_hint}
+
+Recent messages:
+{messages_text}
+
+Write a natural, concise draft reply. Do not send it – just return the draft text.
+Respond in JSON format with a single "draft_reply" field."""
+    )
+
+    parser = JsonOutputParser(pydantic_object=DraftReply)
+    return prompt | llm | parser
+
+
 def log_llm_error(context: str, exc: Exception) -> None:
     """Log LLM errors with context for easier debugging."""
 

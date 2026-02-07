@@ -24,6 +24,15 @@ def _headers(auth_token: Optional[str] = None) -> dict:
     return h
 
 
+def _error_from_response(r: httpx.Response, data: dict) -> str:
+    """Surface clear auth errors for 401/403."""
+    if r.status_code == 401:
+        return "Unauthorized: invalid or expired user token"
+    if r.status_code == 403:
+        return "Forbidden: access denied"
+    return data.get("error", f"HTTP {r.status_code}")
+
+
 def list_user_conversations(
     auth_token: Optional[str] = None,
     limit: int = 50,
@@ -53,7 +62,7 @@ def list_user_conversations(
             if not r.is_success:
                 return {
                     "success": False,
-                    "error": data.get("error", f"HTTP {r.status_code}"),
+                    "error": _error_from_response(r, data),
                 }
             return {"success": True, **data}
     except Exception as e:
@@ -94,7 +103,7 @@ def get_conversation_messages(
             if not r.is_success:
                 return {
                     "success": False,
-                    "error": data.get("error", f"HTTP {r.status_code}"),
+                    "error": _error_from_response(r, data),
                 }
             return {"success": True, **data}
     except Exception as e:
@@ -130,7 +139,7 @@ def send_conversation_message(
             if not r.is_success:
                 return {
                     "success": False,
-                    "error": data.get("error", f"HTTP {r.status_code}"),
+                    "error": _error_from_response(r, data),
                 }
             return {"success": True, **data}
     except Exception as e:
@@ -160,7 +169,7 @@ def get_conversation_by_id(
             if not r.is_success:
                 return {
                     "success": False,
-                    "error": data.get("error", f"HTTP {r.status_code}"),
+                    "error": _error_from_response(r, data),
                 }
             return {"success": True, **data}
     except Exception as e:

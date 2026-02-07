@@ -96,6 +96,26 @@ class OnboardingState(TypedDict, total=False):
     error: str
 
 
+class ChatAssistantState(TypedDict, total=False):
+    """State for the chat assistant graph."""
+
+    # From input – action determines which path to take.
+    action: str  # "list_conversations" | "summarise_conversation" | "draft_reply"
+    conversation_id: str
+    message: str  # Optional user hint for draft_reply (tone/style).
+    auth_token: str
+    user_id: str
+    tenant_id: str
+    # Populated by nodes.
+    conversations: JsonList
+    messages: JsonList
+    conversation_metadata: JsonDict
+    summary: str
+    draft_reply: str
+    response_metadata: JsonDict
+    error: str
+
+
 class EventsCommunitiesState(TypedDict, total=False):
     """State for events/communities recommendations."""
 

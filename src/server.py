@@ -30,6 +30,7 @@ from src.graphs.matching import create_matching_graph
 from src.graphs.safety import create_safety_graph
 from src.graphs.onboarding import create_onboarding_graph
 from src.graphs.events_communities import create_events_communities_graph
+from src.graphs.chat_assistant import create_chat_assistant_graph
 
 # Setup logging
 setup_logging(debug=config.DEBUG)
@@ -201,13 +202,25 @@ async def run_graph(
         elif request.graph == "events_communities":
             graph = create_events_communities_graph()
             logger.debug("Created events_communities graph")
+
+        elif request.graph == "chat_assistant":
+            inp = request.input or {}
+            auth_token = inp.get("auth_token") or ""
+            user_id = inp.get("user_id") or ""
+            if not auth_token or not user_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="chat_assistant graph requires auth_token and user_id in input",
+                )
+            graph = create_chat_assistant_graph()
+            logger.debug("Created chat_assistant graph")
             
         else:
             logger.error(f"Unknown graph: {request.graph}")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Unknown graph: {request.graph}. "
-                       f"Valid options: matching, safety, onboarding, events_communities"
+                       f"Valid options: matching, safety, onboarding, events_communities, chat_assistant"
             )
         
         # ============================================================
