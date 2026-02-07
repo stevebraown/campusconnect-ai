@@ -33,8 +33,8 @@ class Config(BaseSettings):
     PERPLEXITY_API_KEY: Optional[str] = None
     """Perplexity API key for Sonar LLM. Get from https://perplexity.ai/settings/api"""
     
-    PERPLEXITY_MODEL: str = "llama-3.1-sonar-small-128k-online"
-    """Perplexity model to use. Small = fast + cheap, Large = better quality."""
+    PERPLEXITY_MODEL: str = "sonar"
+    """Perplexity model. Use 'sonar' (default) or 'sonar-pro'. See https://docs.perplexity.ai/docs/getting-started/models"""
     
     OPENAI_API_KEY: Optional[str] = None
     """OpenAI API key (fallback if Perplexity not available). Get from https://platform.openai.com/api-keys"""

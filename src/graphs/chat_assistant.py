@@ -61,7 +61,7 @@ class ChatAssistantGraph(BaseGraph):
         graph.add_node("validate_input", self.node_validate_input)
         graph.add_node("list_conversations", self.node_list_conversations)
         graph.add_node("summarise_conversation", self.node_summarise_conversation)
-        graph.add_node("draft_reply", self.node_draft_reply)
+        graph.add_node("generate_draft_reply", self.node_draft_reply)
         graph.add_node("finalize_response", self.node_finalize_response)
 
         graph.set_entry_point("validate_input")
@@ -77,13 +77,13 @@ class ChatAssistantGraph(BaseGraph):
             {
                 "list_conversations": "list_conversations",
                 "summarise_conversation": "summarise_conversation",
-                "draft_reply": "draft_reply",
+                "draft_reply": "generate_draft_reply",
                 "finalize_response": "finalize_response",
             },
         )
         graph.add_edge("list_conversations", "finalize_response")
         graph.add_edge("summarise_conversation", "finalize_response")
-        graph.add_edge("draft_reply", "finalize_response")
+        graph.add_edge("generate_draft_reply", "finalize_response")
         graph.set_finish_point("finalize_response")
 
         return graph

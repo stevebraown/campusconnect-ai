@@ -173,7 +173,7 @@ def get_llm_provider_info() -> dict:
         >>> print(info)
         {
             'perplexity_available': True,
-            'perplexity_model': 'llama-3.1-sonar-small-128k-online',
+            'perplexity_model': 'sonar',
             'openai_available': True,
             'openai_model': 'gpt-3.5-turbo',
             'primary_provider': 'perplexity'

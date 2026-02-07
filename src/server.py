@@ -374,7 +374,10 @@ async def startup_event():
     
     # Configuration already validated above, but log again
     logger.info(f"Firebase Project: {config.FIREBASE_PROJECT_ID}")
-    logger.info(f"LLM: {'Perplexity' if config.PERPLEXITY_API_KEY else 'OpenAI'}")
+    llm_provider = "Perplexity" if config.PERPLEXITY_API_KEY else "OpenAI"
+    logger.info(f"LLM: {llm_provider}")
+    if config.PERPLEXITY_API_KEY:
+        logger.info(f"Perplexity Model: {config.PERPLEXITY_MODEL}")
     logger.info(f"Debug Mode: {config.DEBUG}")
     logger.info(f"Graph Timeout: {config.GRAPH_TIMEOUT}s")
     logger.info(f"Max Candidates: {config.MAX_CANDIDATES}")
