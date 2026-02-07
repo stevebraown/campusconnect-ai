@@ -67,6 +67,12 @@ class Config(BaseSettings):
     """Shared secret for authenticating requests from the JS backend."""
     
     # ============================================================
+    # BACKEND API (FOR CHAT TOOLS)
+    # ============================================================
+    BACKEND_API_URL: str = os.getenv("BACKEND_API_URL", "http://localhost:5001")
+    """CampusConnect backend API base URL. Used by chat tools to call REST endpoints."""
+
+    # ============================================================
     # SERVER CONFIGURATION
     # ============================================================
     PORT: int = 8000
