@@ -60,13 +60,19 @@ app = FastAPI(
 # CORS CONFIGURATION
 # ============================================================
 # Allow requests from JS frontend/backend during dev and production.
-# In production, update origins list with real domain.
-origins = [
-    "http://localhost:5173",  # Vite dev
-    "http://localhost:3000",  # React/Next dev
-    "http://localhost:5001",  # Express+frontend dev origin
-    "https://your-production-domain.com",  # TODO: Update with real frontend domain
-]
+# In production, configure origins via ALLOWED_ORIGINS env in src.config.
+if config.ALLOWED_ORIGINS:
+    origins = [
+        o.strip()
+        for o in config.ALLOWED_ORIGINS.split(",")
+        if o.strip()
+    ]
+else:
+    origins = [
+        "http://localhost:5173",  # Vite dev
+        "http://localhost:3000",  # React/Next dev
+        "http://localhost:5001",  # Express+frontend dev origin
+    ]
 
 app.add_middleware(
     CORSMiddleware,
@@ -235,7 +241,13 @@ async def run_graph(
             
             execution_time = time.time() - start_time
             logger.info(f"✅ {request.graph} graph completed in {execution_time:.2f}s")
-            logger.debug(f"Graph output: {result}")
+
+            # Avoid logging full graph output in production or non-debug environments
+            env = getattr(config, "ENV", "development")
+            if config.DEBUG and env != "production":
+                logger.debug("Graph output (debug, non-prod): %s", result)
+            else:
+                logger.debug("Graph output summary: keys=%s", list(result.keys()))
             logger.info(
                 "run-graph summary: graph=%s input_keys=%s success=%s time=%.2fs",
                 request.graph,
@@ -281,7 +293,7 @@ async def run_graph(
             )
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Graph execution failed: {str(e)}"
+                detail="Graph execution failed"
             )
     
     except HTTPException:
@@ -381,6 +393,12 @@ async def startup_event():
     logger.info(f"Debug Mode: {config.DEBUG}")
     logger.info(f"Graph Timeout: {config.GRAPH_TIMEOUT}s")
     logger.info(f"Max Candidates: {config.MAX_CANDIDATES}")
+    
+    # Log CORS configuration mode for visibility
+    if config.ALLOWED_ORIGINS:
+        logger.info("CORS: using ALLOWED_ORIGINS=%s", config.ALLOWED_ORIGINS)
+    else:
+        logger.info("CORS: using default localhost origins (development mode)")
     
     logger.info("=" * 60)
     logger.info("✅ Service ready to handle requests")

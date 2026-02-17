@@ -7,7 +7,6 @@ Uses pydantic for validation.
 
 from pydantic_settings import BaseSettings
 from typing import Optional
-import os
 
 
 class Config(BaseSettings):
@@ -63,13 +62,21 @@ class Config(BaseSettings):
     # ============================================================
     # SECURITY CONFIGURATION
     # ============================================================
-    AI_SERVICE_TOKEN: str = os.getenv("AI_SERVICE_TOKEN", "")
+    AI_SERVICE_TOKEN: str = ""
     """Shared secret for authenticating requests from the JS backend."""
+    
+    # Optional: runtime environment (development, staging, production)
+    ENV: str = "development"
+    """Runtime environment name (e.g., development, staging, production)."""
+    
+    # CORS allowed origins (optional, comma-separated)
+    ALLOWED_ORIGINS: Optional[str] = None
+    """Comma-separated list of allowed CORS origins. If set, overrides defaults."""
     
     # ============================================================
     # BACKEND API (FOR CHAT TOOLS)
     # ============================================================
-    BACKEND_API_URL: str = os.getenv("BACKEND_API_URL", "http://localhost:5001")
+    BACKEND_API_URL: str = "http://localhost:5001"
     """CampusConnect backend API base URL. Used by chat tools to call REST endpoints."""
 
     # ============================================================
@@ -114,6 +121,7 @@ def validate_config() -> dict:
         ValueError: If required config is missing
     """
     errors = []
+    env = getattr(config, "ENV", "development")
     
     # Firebase is always required
     if not config.FIREBASE_PROJECT_ID:
@@ -127,10 +135,20 @@ def validate_config() -> dict:
     if config.LANGSMITH_ENABLED and not config.LANGSMITH_API_KEY:
         errors.append("LANGSMITH_ENABLED=True but LANGSMITH_API_KEY not set")
     
+    # Production-only validations for stricter security
+    if env == "production":
+        if not config.AI_SERVICE_TOKEN:
+            errors.append("AI_SERVICE_TOKEN is required in production")
+        if not config.BACKEND_API_URL or config.BACKEND_API_URL == "http://localhost:5001":
+            errors.append("BACKEND_API_URL must be set to a non-localhost URL in production")
+        if not config.GOOGLE_APPLICATION_CREDENTIALS:
+            errors.append("GOOGLE_APPLICATION_CREDENTIALS is required in production")
+    
     if errors:
         raise ValueError(f"Configuration errors:\n" + "\n".join([f"  - {e}" for e in errors]))
     
     return {
+        "env": env,
         "firebase": "✓ Configured" if config.FIREBASE_PROJECT_ID else "✗ Missing",
         "perplexity": "✓ Configured" if config.PERPLEXITY_API_KEY else "✗ Not set",
         "openai": "✓ Configured" if config.OPENAI_API_KEY else "✗ Not set",
